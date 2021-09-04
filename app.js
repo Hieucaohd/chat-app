@@ -4,8 +4,8 @@ require("./configs/connectMongoDB").connect();
 const express = require("express");
 const app = express();
 
-const {conversationRoute} = require("./routes/conversation");
-const {messageRoute} = require("./routes/message");
+const conversationRoute = require("./routes/conversation");
+const messageRoute = require("./routes/message");
 
 app.use(express.json());
 
