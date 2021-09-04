@@ -45,10 +45,9 @@ const getMessageController = async (req, res) => {
                 conversationId: conversationId,
             })
             res.status(200).json(messages);
-        } 
-        
-        res.status(403).json({error: "ban khong the xem cuoc tro chuyen nay."});   
-        
+        } else {
+            res.status(403).json({error: "ban khong the xem cuoc tro chuyen nay."});   
+        }
     } catch (err) {
         res.status(500).json(err);
     }
