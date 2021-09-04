@@ -2,8 +2,10 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 
 const getInforOfUser = async (token) => {
+    const findTutorServer = "https://tim-gia-su.herokuapp.com"
+
     return await axios.request({
-        url: 'http://localhost:8000/auth/getInforByToken/',
+        url: `${findTutorServer}/auth/getInforByToken/`,
         headers: {
             'Authorization': `${token}`
         },
