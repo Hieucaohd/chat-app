@@ -3,7 +3,6 @@ const auth = require("../middlewares/auth");
 
 const {createConversationController, getConversationController} = require("../controllers/conversation");
 
-
 // tạo một conversation từ req.
 router.post("/", auth, createConversationController);
 

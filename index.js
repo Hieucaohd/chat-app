@@ -28,12 +28,7 @@ if (DEBUG) {
 	} 
 }
 
-const io = require('socket.io')(server, {
-	cors: {
-		origin: ["http://localhost:3000", "http://192.168.29.102:3000", "https://timgiasu.vercel.app"],
-		methods: ["GET", "POST"], 
-	}
-})
+const io = require('socket.io')(server, options)
 
 io.on("connection", (socket) => {
 	console.log("A user is connected");

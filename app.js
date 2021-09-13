@@ -3,12 +3,19 @@ require("./configs/connectMongoDB").connect();
 
 const express = require("express");
 const app = express();
+const {graphqlHTTP} = require('express-graphql');
+const schema = require("./schema/schema");
+const auth = require('./middlewares/auth');
 
 const conversationRoute = require("./routes/conversation");
 const messageRoute = require("./routes/message");
 
-app.use(express.json());
+app.use("/graphql", auth, graphqlHTTP({
+	schema,
+	graphiql: true
+}));
 
+app.use(express.json());
 app.get("/welcome", (req, res) => {
     res.status(200).send("welcome.");
 });

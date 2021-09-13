@@ -5,7 +5,7 @@ const conversationSchema = new mongoose.Schema(
         members: {
             type: Array,
         },
-        is_hided: {
+        isHided: {
             type: Boolean,
             default: false,
         }

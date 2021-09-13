@@ -14,17 +14,17 @@ const getInforOfUser = async (token) => {
 
 const verifyToken = async (req, res, next) => {
     const token = req.headers.authorization;
-
-    if (!token) {
-        return res.status(403).json({error: "A token is required for authentication"});
-    }
-
-    try {
-        const infor = await getInforOfUser(token);
-        req.user = infor.data;
-    } catch (err) {
-        return res.status(401).json({error: "Invalid token or server error"});
-    }
+	req.user = {};
+	req.user.isAuthenticated = false;
+	if (token) {
+		try {
+			const infor = await getInforOfUser(token);
+			req.user = infor.data;
+			req.user.isAuthenticated = true;
+		} catch (err) {
+			return res.status(401).json({error: "Invalid token or server error"});
+		}
+	}
     
     return next();
 }
