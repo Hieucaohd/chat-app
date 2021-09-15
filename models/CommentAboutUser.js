@@ -12,11 +12,14 @@ const commentAboutUserSchema = new mongoose.Schema(
 				}],
 				body: String,
 			}
-		}
+		},
 		senderId: Number,
 		likedUser: Array,
 		parentCommentId: String,
-		nested: Number,
+		nested: {
+			type: Number,
+			default: 0,
+		},
 	},
     {
         timestamps: true,

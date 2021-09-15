@@ -1,6 +1,10 @@
 const graphql = require('graphql');
 
-const _ = require("lodash");
+const CommentAboutUser = require("../models/CommentAboutUser");
+const CommentAboutRoom = require("../models/CommentAboutRoom");
+const Conversation = require("../models/Conversation");
+const Message = require("../models/Message");
+
 const {
 	GraphQLObjectType, 
 	GraphQLString, 
@@ -10,64 +14,6 @@ const {
 	GraphQLList,
 	GraphQLBoolean,
 } = graphql;
-
-// dummy data
-let books = [
-	{name: "hieucao1", genre: "hieucao1 genre", id: "1", authorId: "1"},
-	{name: "hieucao2", genre: "hieucao2 genre", id: "2", authorId: "2"},
-	{name: "hieucao3", genre: "hieucao3 genre", id: "3", authorId: "3"},
-	{name: "hieucao3", genre: "hieucao3 genre", id: "4", authorId: "1"},
-	{name: "hieucao3", genre: "hieucao3 genre", id: "5", authorId: "2"},
-	{name: "hieucao3", genre: "hieucao3 genre", id: "6", authorId: "3"},
-]
-
-let authors = [
-	{name: "hieucao1", age: 1, id: "1"},
-	{name: "hieucao2", age: 2, id: "2"},
-	{name: "hieucao3", age: 3, id: "3"},
-]
-
-const AuthorType = new GraphQLObjectType({
-	name: 'Author',
-	fields: () => ({
-		id: {
-			type: GraphQLID,
-		},
-		name: {
-			type: GraphQLString,
-		},
-		age: {
-			type: GraphQLInt,
-		},
-		books: {
-			type: new GraphQLList(BookType),
-			resolve(parent, args) {
-				return _.filter(books, {authorId: parent.id})
-			}
-		}
-	})
-})
-
-const BookType = new GraphQLObjectType({
-	name: 'Book',
-	fields: () => ({
-		id: {
-			type: GraphQLID,
-		},
-		name: {
-			type: GraphQLString,
-		},
-		genre: {
-			type: GraphQLString,
-		},
-		author: {
-			type: AuthorType,
-			resolve(parent, args) {
-				return _.find(authors, {id: parent.authorId});
-			}
-		}
-	})
-});
 
 const ConversationType = new GraphQLObjectType({
 	name: "Conversation",
@@ -84,40 +30,209 @@ const ConversationType = new GraphQLObjectType({
 	})
 })
 
+const UserMentionedType = new GraphQLObjectType({
+	name: "UserMentioned",
+	fields: () => ({
+		userId: {
+			type: GraphQLID,
+		},
+		position: {
+			type: GraphQLInt,
+		},
+	})
+})
+
+const TextType = new GraphQLObjectType({
+	name: "Text",
+	fields: () => ({
+		listUserMentioned: {
+			type: new GraphQLList(UserMentionedType),
+			/*	
+			args: {
+				numberUsers: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+
+			}
+			*/
+		},
+		body: {
+			type: GraphQLString,
+		},
+	})
+})
+
+const ContentType = new GraphQLObjectType({
+	name: "Content",
+	fields: () => ({
+		image: {
+			type: GraphQLString,
+		},
+		text: {
+			type: TextType,
+		},
+	})
+})
+
+const ChildCommentAboutUserType = new GraphQLObjectType({
+	name: "ChildCommentAboutUser",
+	fields: () => ({
+		result: {
+			type: new GraphQLList(CommentAboutUserType),
+		}
+	})
+})
+
+const CommentAboutUserType = new GraphQLObjectType({
+	name: "CommentAboutUser",
+	fields: () => ({
+		id: {
+			type: GraphQLID,
+		},
+		userId: {
+			type: GraphQLID,
+		},
+		senderId: {
+			type: GraphQLID,
+		},
+		likedUser: {
+			type: new GraphQLList(GraphQLID),
+		},
+		parentCommentId: {
+			type: GraphQLID,
+		},
+		nested: {
+			type: GraphQLInt,
+		},
+		createdAt: {
+			type: GraphQLString,
+		},
+		updatedAt: {
+			type: GraphQLString,
+		},
+		content: {
+			type: ContentType,
+		},
+		childComments: {
+			type: ChildCommentAboutUserType,
+			args: {
+				numberComments: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+				if (args.numberComments) {
+					return CommentAboutUser.find({ parentCommentId: parent.id }).sort({ createdAt: "desc" }).limit(args.numberComments);
+				}
+
+				return CommentAboutUser.find({parentCommentId: parent.id}).sort({ createdAt: "desc" });
+			},
+		}
+	})
+})
+
+const ChildCommentAboutRoomType = new GraphQLObjectType({
+	name: "ChildCommentAboutRoom",
+	fields: () => ({
+		result: {
+			type: new GraphQLList(CommentAboutRoomType),
+		}
+	})
+})
+
+const CommentAboutRoomType = new GraphQLObjectType({
+	name: "CommentAboutRoom",
+	fields: () => ({
+		id: {
+			type: GraphQLID,
+		},
+		roomId: {
+			type: GraphQLID,
+		},
+		senderId: {
+			type: GraphQLID,
+		},
+		likedUser: {
+			type: new GraphQLList(GraphQLID),
+		},
+		parentCommentId: {
+			type: GraphQLID,
+		},
+		nested: {
+			type: GraphQLInt,
+		},
+		createdAt: {
+			type: GraphQLString,
+		},
+		updatedAt: {
+			type: GraphQLString,
+		},
+		content: {
+			type: ContentType,
+		},
+		childComments: {
+			type: ChildCommentAboutRoomType,
+			args: {
+				numberComments: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+				if (args.numberComments) {
+					return CommentAboutUser.find({parentCommentId: parent.id}).sort({ createdAt: "desc" }).limit(args.numberComments);
+				}
+
+				return CommentAboutUser.find({ parentCommentId: parent.id }).sort({ createdAt: "desc" });
+			},
+		}
+	})
+})
+
 const RootQuery = new GraphQLObjectType({
 	name: "RootQueryType",
 	fields: {
-		book: {
-			type: BookType,
+		CommentAboutUserById: {
+			type: CommentAboutUserType,
 			args: {
-				id: {
-					type: GraphQLID,
-				}
+				id: { type: GraphQLID }
 			},
 			resolve(parent, args, request) {
-				// code to get data from database
-				console.log(request.user);
-				console.log(request.user.isAuthenticated);
-				return _.find(books, {id: args.id});
-			}
-		},
-		author: {
-			type: AuthorType,
-			args: {
-				id: {
-					type: GraphQLID,
-				}
+				return CommentAboutUser.findById(args.id)
 			},
-			resolve(parent, args){
-				return _.find(authors, {id: args.id});
-			}
 		},
-		books: {
-			type: new GraphQLList(BookType),
-			resolve(parent, args) {
-				return books;
-			}
-		}
+		CommentAboutUsers: {
+			type: new GraphQLList(CommentAboutUserType),
+			args: {
+				userId: { type: GraphQLID },
+				numberComments: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+				if (args.numberComments) {
+					return CommentAboutUser.find({ userId: args.userId }).sort({ createdAt: "desc" }).limit(args.numberComments);
+				}
+
+				return CommentAboutUser.find({ userId: args.userId }).sort({ createdAt: "desc" });
+			},
+		},
+		CommentAboutRoomById: {
+			type: CommentAboutRoomType,
+			args: {
+				id: { type: GraphQLID },
+			},
+			resolve(parent, args, request) {
+				return CommentAboutRoom.findById(args.id);
+			},
+		},
+		CommentAboutRooms: {
+			type: new GraphQLList(CommentAboutRoomType),
+			args: {
+				roomId: { type: GraphQLID },
+				numberComments: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+				if (args.numberComments) {
+					return CommentAboutRoom.find({ roomId: args.roomId }).sort({ createdAt: "desc" }).limit(args.numberComments);
+				}
+
+				return CommentAboutRoom.find({ roomId: args.roomId }).sort({ createdAt: "desc" });
+			},
+		},
 	}
 });
 

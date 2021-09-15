@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
 
-const DEBUG = true;
+const DEBUG = false;
 
 let options = {};
 if (DEBUG) {

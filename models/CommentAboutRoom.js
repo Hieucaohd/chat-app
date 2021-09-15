@@ -12,7 +12,7 @@ const commentAboutRoomSchema = new mongoose.Schema(
 				}],
 				body: String,
 			}
-		}
+		},
 		senderId: Number,
 		likedUser: Array,
 		parentCommentId: String,
