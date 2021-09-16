@@ -47,14 +47,6 @@ const TextType = new GraphQLObjectType({
 	fields: () => ({
 		listUserMentioned: {
 			type: new GraphQLList(UserMentionedType),
-			/*	
-			args: {
-				numberUsers: { type: GraphQLInt },
-			},
-			resolve(parent, args, request) {
-
-			}
-			*/
 		},
 		body: {
 			type: GraphQLString,
@@ -71,15 +63,6 @@ const ContentType = new GraphQLObjectType({
 		text: {
 			type: TextType,
 		},
-	})
-})
-
-const ChildCommentAboutUserType = new GraphQLObjectType({
-	name: "ChildCommentAboutUser",
-	fields: () => ({
-		result: {
-			type: new GraphQLList(CommentAboutUserType),
-		}
 	})
 })
 
@@ -114,26 +97,19 @@ const CommentAboutUserType = new GraphQLObjectType({
 			type: ContentType,
 		},
 		childComments: {
-			type: ChildCommentAboutUserType,
+			type: new GraphQLList(CommentAboutUserType),
 			args: {
 				numberComments: { type: GraphQLInt },
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutUser.find({ parentCommentId: parent.id }).sort({ createdAt: "desc" }).limit(args.numberComments);
+					return CommentAboutUser.find({ parentCommentId: parent.id })
+						.sort({ createdAt: "desc" })
+						.limit(args.numberComments);
 				}
-
-				return CommentAboutUser.find({parentCommentId: parent.id}).sort({ createdAt: "desc" });
+				return CommentAboutUser.find({ parentCommentId: parent.id })
+					.sort({ createdAt: "desc" });
 			},
-		}
-	})
-})
-
-const ChildCommentAboutRoomType = new GraphQLObjectType({
-	name: "ChildCommentAboutRoom",
-	fields: () => ({
-		result: {
-			type: new GraphQLList(CommentAboutRoomType),
 		}
 	})
 })
@@ -169,16 +145,18 @@ const CommentAboutRoomType = new GraphQLObjectType({
 			type: ContentType,
 		},
 		childComments: {
-			type: ChildCommentAboutRoomType,
+			type: new GraphQLList(CommentAboutRoomType),
 			args: {
 				numberComments: { type: GraphQLInt },
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutUser.find({parentCommentId: parent.id}).sort({ createdAt: "desc" }).limit(args.numberComments);
+					return CommentAboutRoom.find({ parentCommentId: parent.id })
+						.sort({ createdAt: "desc" })
+						.limit(args.numberComments);
 				}
-
-				return CommentAboutUser.find({ parentCommentId: parent.id }).sort({ createdAt: "desc" });
+				return CommentAboutRoom.find({ parentCommentId: parent.id })
+					.sort({ createdAt: "desc" });
 			},
 		}
 	})
@@ -193,7 +171,7 @@ const RootQuery = new GraphQLObjectType({
 				id: { type: GraphQLID }
 			},
 			resolve(parent, args, request) {
-				return CommentAboutUser.findById(args.id)
+				return CommentAboutUser.findById(args.id);
 			},
 		},
 		CommentAboutUsers: {
@@ -204,10 +182,12 @@ const RootQuery = new GraphQLObjectType({
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutUser.find({ userId: args.userId }).sort({ createdAt: "desc" }).limit(args.numberComments);
+					return CommentAboutUser.find({ userId: args.userId, nested: 0 })
+						.sort({ createdAt: "desc" })
+						.limit(args.numberComments);
 				}
-
-				return CommentAboutUser.find({ userId: args.userId }).sort({ createdAt: "desc" });
+				return CommentAboutUser.find({ userId: args.userId, nested: 0 })
+					.sort({ createdAt: "desc" });
 			},
 		},
 		CommentAboutRoomById: {
@@ -227,10 +207,13 @@ const RootQuery = new GraphQLObjectType({
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutRoom.find({ roomId: args.roomId }).sort({ createdAt: "desc" }).limit(args.numberComments);
+					return CommentAboutRoom.find({ roomId: args.roomId, nested: 0 })
+						.sort({ createdAt: "desc" })
+						.limit(args.numberComments);
 				}
 
-				return CommentAboutRoom.find({ roomId: args.roomId }).sort({ createdAt: "desc" });
+				return CommentAboutRoom.find({ roomId: args.roomId, nested: 0 })
+					.sort({ createdAt: "desc" });
 			},
 		},
 	}
