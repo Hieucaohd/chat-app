@@ -26,8 +26,31 @@ const ConversationType = new GraphQLObjectType({
 		},
 		isHided: {
 			type: GraphQLBoolean,
+		},
+		messages: {
+			type: new GraphQLList(MessageType),
+			args: {
+				numberMessages: { type: GraphQLInt }
+			},
+			resolve(parent, args, request) {
+				return Message.find({ conversationId: parent.id })
+					.sort({ createdAt: "desc" })
+					.limit(args.numberMessages);
+			},
 		}
 	})
+})
+
+const MessageType = new GraphQLObjectType({
+	name: "Message",
+	fields: () => ({
+		id: { type: GraphQLID },
+		conversationId: { type: GraphQLID }	,
+		senderId: { type: GraphQLID },
+		text: { type: GraphQLString },
+		createdAt: { type: GraphQLString },
+		updatedAt: { type: GraphQLString },
+	}),
 })
 
 const UserMentionedType = new GraphQLObjectType({
@@ -216,6 +239,35 @@ const RootQuery = new GraphQLObjectType({
 					.sort({ createdAt: "desc" });
 			},
 		},
+		ConversationsOfUser: {
+			type: new GraphQLList(ConversationType),
+			args: {
+				numberConversations: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+				if (args.numberConversations) {
+					return Conversation.find({ members: { $in: [request.user.id] } })
+						.limit(args.numberConversations);
+				}
+
+				return Conversation.find({ members: { $in: [request.user.id] } });
+			}
+		},
+		ConversationById: {
+			type: ConversationType,
+			args: {
+				id: { type: GraphQLID },
+			},
+			async resolve(parent, args, request) {
+				const conversation = await Conversation.findById(args.id);
+				const userId = request.user.id;
+				if (conversation.members.find(memberId => memberId === userId)) {
+					return conversation;
+				}
+
+				return null;
+			}
+		}	
 	}
 });
 

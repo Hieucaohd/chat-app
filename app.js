@@ -26,8 +26,8 @@ app.get("/welcome", (req, res) => {
     res.status(200).send("welcome.");
 });
 
-app.use("/api/conversations", conversationRoute);
-app.use("/api/messages", messageRoute);
+app.use("/conversations", conversationRoute);
+app.use("/messages", messageRoute);
 app.use("/commentAboutUser", commentAboutUserRoute);
 app.use("/commentAboutRoom", commentAboutRoomRoute);
 
