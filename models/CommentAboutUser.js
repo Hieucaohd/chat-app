@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+// nothing
+
 const commentAboutUserSchema = new mongoose.Schema(
 	{
 		userId: Number,
