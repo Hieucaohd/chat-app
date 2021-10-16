@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 
 const getInforOfUser = async (token) => {
-    const findTutorServer = "localhost:8000"
+    const findTutorServer = "localhost:8001"
 
     return await axios.request({
         url: `${findTutorServer}/auth/getInforByToken/`,
