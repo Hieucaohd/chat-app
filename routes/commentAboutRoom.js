@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const {checkForRoom} = require("../middlewares/checkForComment");
+const validateInput = require("../middlewares/checkForComment");
 
 const {createCommentAboutRoomController} = require("../controllers/commentAboutRoom");
 
-router.post("/", checkForRoom, createCommentAboutRoomController);
+router.post("/", validateInput, createCommentAboutRoomController);
 
 module.exports = router;

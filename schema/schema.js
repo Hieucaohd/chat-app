@@ -1,7 +1,6 @@
 const graphql = require('graphql');
 
-const CommentAboutUser = require("../models/CommentAboutUser");
-const CommentAboutRoom = require("../models/CommentAboutRoom");
+const Comment = require("../models/Comment");
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 
@@ -18,15 +17,9 @@ const {
 const ConversationType = new GraphQLObjectType({
 	name: "Conversation",
 	fields: () => ({
-		id: {
-			type: GraphQLID,
-		},
-		members: {
-			type: new GraphQLList(GraphQLID),
-		},
-		isHided: {
-			type: GraphQLBoolean,
-		},
+		id: { type: GraphQLID },
+		members: { type: new GraphQLList(GraphQLID) },
+		isHided: { type: GraphQLBoolean },
 		messages: {
 			type: new GraphQLList(MessageType),
 			args: {
@@ -56,24 +49,16 @@ const MessageType = new GraphQLObjectType({
 const UserMentionedType = new GraphQLObjectType({
 	name: "UserMentioned",
 	fields: () => ({
-		userId: {
-			type: GraphQLID,
-		},
-		position: {
-			type: GraphQLInt,
-		},
+		userId: { type: GraphQLID },
+		position: { type: GraphQLInt },
 	})
 })
 
 const TextType = new GraphQLObjectType({
 	name: "Text",
 	fields: () => ({
-		listUserMentioned: {
-			type: new GraphQLList(UserMentionedType),
-		},
-		body: {
-			type: GraphQLString,
-		},
+		listUserMentioned: { type: new GraphQLList(UserMentionedType) },
+		body: { type: GraphQLString },
 	})
 })
 
@@ -89,13 +74,13 @@ const ContentType = new GraphQLObjectType({
 	})
 })
 
-const CommentAboutUserType = new GraphQLObjectType({
-	name: "CommentAboutUser",
+const CommentType = new GraphQLObjectType({
+	name: "Comment",
 	fields: () => ({
 		id: {
 			type: GraphQLID,
 		},
-		userId: {
+		receiverId: {
 			type: GraphQLID,
 		},
 		senderId: {
@@ -119,66 +104,19 @@ const CommentAboutUserType = new GraphQLObjectType({
 		content: {
 			type: ContentType,
 		},
+		type_comment: { type: GraphQLString },
 		childComments: {
-			type: new GraphQLList(CommentAboutUserType),
+			type: new GraphQLList(CommentType),
 			args: {
 				numberComments: { type: GraphQLInt },
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutUser.find({ parentCommentId: parent.id })
+					return Comment.find({ parentCommentId: parent.id })
 						.sort({ createdAt: "desc" })
 						.limit(args.numberComments);
 				}
-				return CommentAboutUser.find({ parentCommentId: parent.id })
-					.sort({ createdAt: "desc" });
-			},
-		}
-	})
-})
-
-const CommentAboutRoomType = new GraphQLObjectType({
-	name: "CommentAboutRoom",
-	fields: () => ({
-		id: {
-			type: GraphQLID,
-		},
-		roomId: {
-			type: GraphQLID,
-		},
-		senderId: {
-			type: GraphQLID,
-		},
-		likedUser: {
-			type: new GraphQLList(GraphQLID),
-		},
-		parentCommentId: {
-			type: GraphQLID,
-		},
-		nested: {
-			type: GraphQLInt,
-		},
-		createdAt: {
-			type: GraphQLString,
-		},
-		updatedAt: {
-			type: GraphQLString,
-		},
-		content: {
-			type: ContentType,
-		},
-		childComments: {
-			type: new GraphQLList(CommentAboutRoomType),
-			args: {
-				numberComments: { type: GraphQLInt },
-			},
-			resolve(parent, args, request) {
-				if (args.numberComments) {
-					return CommentAboutRoom.find({ parentCommentId: parent.id })
-						.sort({ createdAt: "desc" })
-						.limit(args.numberComments);
-				}
-				return CommentAboutRoom.find({ parentCommentId: parent.id })
+				return Comment.find({ parentCommentId: parent.id })
 					.sort({ createdAt: "desc" });
 			},
 		}
@@ -188,54 +126,53 @@ const CommentAboutRoomType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
 	name: "RootQueryType",
 	fields: {
-		CommentAboutUserById: {
-			type: CommentAboutUserType,
-			args: {
-				id: { type: GraphQLID }
-			},
-			resolve(parent, args, request) {
-				return CommentAboutUser.findById(args.id);
-			},
-		},
-		CommentAboutUsers: {
-			type: new GraphQLList(CommentAboutUserType),
+		CommentsAboutUser: {
+			type: new GraphQLList(CommentType),
 			args: {
 				userId: { type: GraphQLID },
 				numberComments: { type: GraphQLInt },
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutUser.find({ userId: args.userId, nested: 0 })
+					return Comment.find({ receiverId: args.userId, nested: 0, type_comment: "user_comment" })
 						.sort({ createdAt: "desc" })
 						.limit(args.numberComments);
 				}
-				return CommentAboutUser.find({ userId: args.userId, nested: 0 })
+				return Comment.find({ receiverId: args.userId, nested: 0, type_comment: "user_comment" })
 					.sort({ createdAt: "desc" });
 			},
 		},
-		CommentAboutRoomById: {
-			type: CommentAboutRoomType,
-			args: {
-				id: { type: GraphQLID },
-			},
-			resolve(parent, args, request) {
-				return CommentAboutRoom.findById(args.id);
-			},
-		},
-		CommentAboutRooms: {
-			type: new GraphQLList(CommentAboutRoomType),
+		CommentsAboutRoom: {
+			type: new GraphQLList(CommentType),
 			args: {
 				roomId: { type: GraphQLID },
 				numberComments: { type: GraphQLInt },
 			},
 			resolve(parent, args, request) {
 				if (args.numberComments) {
-					return CommentAboutRoom.find({ roomId: args.roomId, nested: 0 })
+					return Comment.find({ receiverId: args.roomId, nested: 0, type_comment: "room_comment" })
 						.sort({ createdAt: "desc" })
 						.limit(args.numberComments);
 				}
 
-				return CommentAboutRoom.find({ roomId: args.roomId, nested: 0 })
+				return Comment.find({ receiverId: args.roomId, nested: 0, type_comment: "room_comment" })
+					.sort({ createdAt: "desc" });
+			},
+		},
+		ChildComments: {
+			type: new GraphQLList(CommentType),
+			args: {
+				parentCommentId: { type: GraphQLID },
+				numberComments: { type: GraphQLInt },
+			},
+			resolve(parent, args, request) {
+				if (args.numberComments) {
+					return Comment.find({ parentCommentId: args.parentCommentId })
+						.sort({ createdAt: "desc" })
+						.limit(args.numberComments);
+				}
+
+				return Comment.find({ parentCommentId: args.parentCommentId })
 					.sort({ createdAt: "desc" });
 			},
 		},

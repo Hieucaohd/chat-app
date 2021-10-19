@@ -2,4 +2,4 @@
 
 cd /home/ubuntu/chatApp
 
-npm install
+npm install --production

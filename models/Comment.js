@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
-const commentAboutRoomSchema = new mongoose.Schema(
+const comment = new mongoose.Schema(
 	{
-		roomId: Number,
 		content: {
 			image: String,
 			text: {
@@ -13,6 +12,7 @@ const commentAboutRoomSchema = new mongoose.Schema(
 				body: String,
 			}
 		},
+		receiverId: Number,
 		senderId: Number,
 		likedUser: Array,
 		parentCommentId: String,
@@ -20,10 +20,11 @@ const commentAboutRoomSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
+		type_comment: String,
 	},
     {
         timestamps: true,
     }
 );
 
-module.exports = mongoose.model("commentAboutRoom", commentAboutRoomSchema);
+module.exports = mongoose.model("comment", comment);

@@ -22,9 +22,6 @@ app.use("/graphql", graphqlHTTP({
 }));
 
 app.use(express.json());
-app.get("/welcome", (req, res) => {
-    res.status(200).send("welcome.");
-});
 
 app.use("/conversations", conversationRoute);
 app.use("/messages", messageRoute);
