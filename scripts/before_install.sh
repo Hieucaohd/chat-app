@@ -1,3 +1,5 @@
 #!/bin/bash
 
-rm -R /home/ubuntu/chatApp
+cd /home/ubuntu/chatApp/
+rm -v !("node_modules")
+rm -R !("node_modules")
