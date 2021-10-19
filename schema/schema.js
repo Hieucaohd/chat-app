@@ -205,6 +205,12 @@ const RootQuery = new GraphQLObjectType({
 				return null;
 			}
 		}	
+		try: {
+			type: GraphQLString,
+			async resolve(parent, args, request) {
+				return "Hello Hieucao";
+			}
+		}
 	}
 });
 
