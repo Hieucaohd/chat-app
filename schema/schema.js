@@ -205,7 +205,7 @@ const RootQuery = new GraphQLObjectType({
 				return null;
 			}
 		}	
-		try: {
+		tryGraphql: {
 			type: GraphQLString,
 			async resolve(parent, args, request) {
 				return "Hello Hieucao";
